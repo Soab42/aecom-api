@@ -1,36 +1,292 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# E-commerce API Documentation
 
-## Getting Started
+Base URL: `https://api.yourdomain.com/v1`
 
-First, run the development server:
+## Authentication
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+All API requests require a Bearer token in the Authorization header:
+
+```http
+Authorization: Bearer <your_token>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Products API
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Get All Products
+```http
+GET /api/products
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Query Parameters:
+| Parameter  | Type    | Description                    |
+|------------|---------|--------------------------------|
+| page       | integer | Page number (default: 1)       |
+| limit      | integer | Items per page (default: 10)   |
+| category   | string  | Filter by category             |
+| search     | string  | Search in name and description |
+| sort       | string  | Sort by field (price, date)    |
 
-## Learn More
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "products": [
+      {
+        "id": "string",
+        "name": "string",
+        "description": "string",
+        "price": "number",
+        "category": "string",
+        "images": ["string"],
+        "stock": "number",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ],
+    "totalItems": "number",
+    "currentPage": "number",
+    "totalPages": "number"
+  }
+}
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Get Single Product
+```http
+GET /api/products/:id
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "price": "number",
+    "category": "string",
+    "images": ["string"],
+    "stock": "number",
+    "specifications": "object",
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
+}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Create Product
+```http
+POST /api/products
+```
 
-## Deploy on Vercel
+Request Body:
+```json
+{
+  "name": "string (required)",
+  "description": "string (required)",
+  "price": "number (required)",
+  "category": "string (required)",
+  "images": ["string"],
+  "stock": "number (required)",
+  "specifications": "object"
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Update Product
+```http
+PUT /api/products/:id
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Request Body: Same as Create Product (all fields optional)
+
+### Delete Product
+```http
+DELETE /api/products/:id
+```
+
+## Orders API
+
+### Get All Orders
+```http
+GET /api/orders
+```
+
+Query Parameters:
+| Parameter  | Type    | Description                     |
+|------------|---------|----------------------------------|
+| page       | integer | Page number (default: 1)         |
+| limit      | integer | Items per page (default: 10)     |
+| status     | string  | Filter by status                 |
+| dateFrom   | string  | Filter by date (YYYY-MM-DD)      |
+| dateTo     | string  | Filter by date (YYYY-MM-DD)      |
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "orders": [
+      {
+        "id": "string",
+        "userId": "string",
+        "products": [
+          {
+            "productId": "string",
+            "quantity": "number",
+            "price": "number"
+          }
+        ],
+        "totalAmount": "number",
+        "status": "string",
+        "shippingAddress": "object",
+        "paymentStatus": "string",
+        "createdAt": "string",
+        "updatedAt": "string"
+      }
+    ],
+    "totalItems": "number",
+    "currentPage": "number",
+    "totalPages": "number"
+  }
+}
+```
+
+### Create Order
+```http
+POST /api/orders
+```
+
+Request Body:
+```json
+{
+  "products": [
+    {
+      "productId": "string (required)",
+      "quantity": "number (required)"
+    }
+  ],
+  "shippingAddress": {
+    "street": "string (required)",
+    "city": "string (required)",
+    "state": "string (required)",
+    "zipCode": "string (required)",
+    "country": "string (required)"
+  },
+  "paymentMethod": "string (required)"
+}
+```
+
+### Update Order Status
+```http
+PUT /api/orders/:id/status
+```
+
+Request Body:
+```json
+{
+  "status": "string (required)",
+  "note": "string"
+}
+```
+
+## Users API
+
+### Get All Users
+```http
+GET /api/users
+```
+
+Query Parameters:
+| Parameter  | Type    | Description                    |
+|------------|---------|--------------------------------|
+| page       | integer | Page number (default: 1)       |
+| limit      | integer | Items per page (default: 10)   |
+| role       | string  | Filter by role                 |
+| search     | string  | Search in name and email       |
+
+### Create User
+```http
+POST /api/users
+```
+
+Request Body:
+```json
+{
+  "name": "string (required)",
+  "email": "string (required)",
+  "password": "string (required)",
+  "role": "string (default: customer)"
+}
+```
+
+### Update User
+```http
+PUT /api/users/:id
+```
+
+Request Body:
+```json
+{
+  "name": "string",
+  "email": "string",
+  "role": "string"
+}
+```
+
+## Error Responses
+
+All endpoints follow the same error response format:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "string",
+    "message": "string",
+    "details": "object (optional)"
+  }
+}
+```
+
+Common Error Codes:
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 422: Validation Error
+- 500: Internal Server Error
+
+## Rate Limiting
+
+- Rate limit: 100 requests per minute
+- Exceeded rate limit response: HTTP 429 (Too Many Requests)
+
+## Webhooks
+
+### Order Status Updates
+```http
+POST /webhooks/orders
+```
+
+Payload:
+```json
+{
+  "orderId": "string",
+  "status": "string",
+  "timestamp": "string",
+  "metadata": "object"
+}
+```
+
+## Testing
+
+Base URL for testing: `https://api-staging.yourdomain.com/v1`
+
+Test credentials:
+```json
+{
+  "email": "test@example.com",
+  "password": "test1234"
+}
+```
